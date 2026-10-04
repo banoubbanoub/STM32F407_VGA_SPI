@@ -113,7 +113,12 @@ void Engine3D::display() {
     if (_doubleBuffered && _screen && _backBuffer) {
         size_t bufferSize = (size_t)_hres * _height;
         _vga->waitVBlank(); // copy during blanking to avoid tearing
-        std::memcpy(_screen, _backBuffer, bufferSize);
+        // I2S sends each half-word MSB first, so swap the bytes of every pair to keep left-to-right pixel order.
+        const uint32_t *src = (const uint32_t *)_backBuffer;
+        uint32_t *dst = (uint32_t *)_screen;
+        for (size_t i = 0; i < bufferSize / 4; i++) {
+            dst[i] = __REV16(src[i]);
+        }
     }
 }
 
