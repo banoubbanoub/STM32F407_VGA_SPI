@@ -331,26 +331,26 @@ void Direct_modulation() {
         "STM32F407 DISCOVERY - VGA 640x480 MONO GREEN",
         "============================================",
         "",
-        "VIDEO TIMING (all done by hardware, CPU stays free):",
+        "VIDEO TIMING (hardware, CPU stays free):",
+        "TIM4 CH1 (PB6): PWM 31.47 kHz, 3.81 us low = HSYNC",
+        "TIM4 update IRQ: 525 lines/frame, VSYNC on PB7",
+        "TIM4 CH2 compare IRQ: video start, kicks DMA",
         "",
-        "TIM4 CH1 (PB6): PWM, 31.47 kHz line rate, 3.81 us",
-        "  low pulse = HSYNC",
-        "TIM4 update IRQ: counts 525 lines, drives VSYNC (PB7)",
-        "TIM4 CH2 compare IRQ: start of active video, kicks DMA",
+        "PIXEL OUTPUT VIA I2S2:",
+        "SYSCLK 168 MHz (HSE 8 MHz, PLL M=8 N=336 P=2)",
+        "PLLI2S 126 MHz, I2SDIV 2+ODD (/5) = 25.2 MHz bit clock",
+        "I2S2 master TX, 16-bit frames: SD pin PB15 = pixels",
+        "DMA1 Stream4 ch0 sends 40 half-words (80 bytes) a line",
+        "I2S restarts every line so pixels stay locked to HSYNC",
+        "Frame buffer 640x480x1 bit = 38400 bytes, copied",
+        "  during V-blank with byte swap, so no tearing",
         "",
-        "PIXEL OUTPUT:",
+        "WIRING: PB15 -> 270 ohm -> VGA pin 2 (green)",
+        "  PB6 -> pin 13 HSYNC, PB7 -> pin 14 VSYNC",
+        "  GND -> pins 5-8 and 10",
         "",
-        "DMA2 Stream3 copies 80 bytes per line from RAM to SPI1",
-        "SPI1 (PA7 MOSI) shifts 1 bit per pixel at 25.2 MHz",
-        "SYSCLK 201.6 MHz: HSE 8 MHz, PLL M=5 N=252 P=2",
-        "Frame buffer: 640x480 x 1 bit = 38400 bytes in SRAM",
-        "Back buffer is copied during V-blank, so no tearing",
-        "",
-        "WIRING: PA7 -> 270 ohm -> VGA pin 2 (green)",
-        "  PB6 -> pin 13 HSYNC, PB7 -> pin 14 VSYNC, GND -> 5-8,10",
-        "",
-        "Engine3D draws lines, text, 3D meshes and bitmaps.",
-        "Press the USER button (PA0) to change demo mode."
+        "Engine3D: lines, text, 3D meshes and bitmaps.",
+        "Press USER button (PA0) to change demo mode."
     };
     const int rows = sizeof(lines) / sizeof(lines[0]);
     const uint32_t MS_PER_CHAR = 40;
@@ -408,8 +408,9 @@ void DrawSchematic() {
 
     const int yG = 140, yH = 190, yV = 230, yD = 270;
 
-    // PA7 (SPI1 MOSI) -> 270R -> pin 2 green
-    schemText(60, yG - 5, "PA7");
+    // PB15 (I2S2_SD) -> 270R -> pin 2 green
+    schemText(40, yG - 5, "PB15 I2S2_SD");
+    schemText(40, yG + 10, "(SPI2_MOSI AF5)");
     engine.line(210, yG, 270, yG, 1);
     schemBox(270, yG - 10, 340, yG + 10);
     schemText(285, yG - 28, "270R");
@@ -431,11 +432,14 @@ void DrawSchematic() {
     engine.line(210, yD, 430, yD, 1);
     schemText(440, yD - 5, "5-8,10 GND");
 
-    schemText(30, 320, "PA7 SPI1 MOSI: 1 bit per pixel, 25.2 MHz");
-    schemText(30, 345, "PB6 TIM4 CH1 PWM: 31.47 kHz, active low");
+    schemText(30, 320, "I2S2/SPI2 pins (AF5): PB15 SD/MOSI, PB13 CK/SCK");
+    schemText(30, 335, "  PB12 WS/NSS, PB14 MISO, PC6 MCK (only PB15 used)");
+    schemText(30, 355, "PB6 TIM4 CH1 PWM: 31.47 kHz, active low");
     schemText(30, 370, "PB7 GPIO: VSYNC, 60 Hz, active low");
-    schemText(30, 405, "270R + 75R monitor input = about 0.7 V at full green");
-    schemText(30, 430, "Tie pins 1 and 3 (red, blue) to GND for mono green");
+    schemText(30, 390, "DMA1 Stream4 ch0 -> SPI2/I2S2 DR, 16-bit, per line");
+    schemText(30, 410, "I2S2: 25.2 MHz bit clock from PLLI2S, 1 bit per pixel");
+    schemText(30, 430, "270R + 75R monitor input = about 0.7 V at full green");
+    schemText(30, 450, "Tie pins 1 and 3 (red, blue) to GND for mono green");
 }
 
 void DrawImage(uint16_t imge_number) {
