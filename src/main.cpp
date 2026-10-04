@@ -7,6 +7,7 @@
 #include "lenabmp.h"
 #include "rectbmp.h"
 #include "image_data.h"
+#include "robot_bitmap.h"
 
 // ------------------------------------------------------------
 // Pin Definitions & Display Configuration
@@ -465,6 +466,21 @@ void DrawImage(uint16_t imge_number) {
   //engine.delay(100); // Optional delay for visual effect
 }
 
+void DrawRobot() {
+    engine.LoadBitmap(robot_bitmap, sizeof(robot_bitmap));
+
+    // The bitmap has a stray vertical line at x=18 (and a short blob at the bottom); the robot starts at x>=20.
+    uint8_t *fb = engine.getBackBuffer();
+    for (int row = 0; row < 480; row++) {
+        uint8_t *line = fb + row * 80;
+        if (row >= 440) {
+            line[0] = line[1] = line[2] = 0;
+        } else {
+            line[2] &= ~0x20;
+        }
+    }
+}
+
 void TVlogo() {
     engine.clear();
     engine.intro();
@@ -700,7 +716,7 @@ void loop() {
             DrawSchematic();
             break;
         case 6:
-          //  DrawImage(5);
+            DrawRobot();
             break;
         case 7:
             //DrawTerminalMode();
