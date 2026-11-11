@@ -811,19 +811,11 @@ Possible improvements include:
 
 ---
 
-# License
 
-Add your preferred open-source license here, for example MIT:
-
-```text
-MIT License
-```
-
----
 
 # Author
 
-**Banou**
+**Banoub**
 
 STM32 / embedded graphics / VGA experimentation.
 
