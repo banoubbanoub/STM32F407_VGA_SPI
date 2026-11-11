@@ -811,7 +811,10 @@ Possible improvements include:
 
 ---
 
+License
+This project is provided as free software for experimentation, education, modification, and personal projects.
 
+You are welcome to study the source code, modify it, and adapt the video engine to your own STM32 projects.
 
 # Author
 
